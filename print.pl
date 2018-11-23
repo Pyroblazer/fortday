@@ -1,3 +1,65 @@
+/*print map*/
+print_map(11,20):- !.
+print_map(11,Y):-
+    Y2 is Y+1,nl,
+    print_map(-1,Y2),!.
+print_map(X,Y):-
+    Y= -1, X2 is X+1 ,print_border,!,
+    print_map(X2,Y).
+print_map(X,Y):-
+    Y=10,X2 is X+1, print_border,!,
+    print_map(X2,Y).
+print_map(X,Y):-
+    X= -1,X2 is X+1, print_border,!,
+    print_map(X2,Y).
+print_map(X,Y):-
+    X=10,X2 is X+1, print_border,!,
+    print_map(X2,Y).
+print_map(X,Y):-
+    X2 is X+1, print_format(X,Y),!,
+    print_map(X2,Y).
+
+/*print format*/
+print_format(X,Y):-
+    player(X,Y,_,_,_,_,_),
+    print_player.
+print_format(X,Y):-
+    enemy(_,X,Y,_,_),
+    print_enemy.
+print_format(X,Y):-
+    location(X,Y,Item),
+    weapon_id(_,Item),
+    print_weapon.
+print_format(X,Y):-
+    location(X,Y,Item),
+    type_item(medicine,Item),
+    print_medicine.
+print_format(X,Y):-
+    location(X,Y,Item),
+    type_item(ammo,Item),
+    print_ammo.
+print_format(X,Y):-
+    location(X,Y,Item),
+    type_item(armor,Item),
+    print_armor.
+print_format(X,_):-
+    X < 0,
+    print_border.
+print_format(X,_):-
+    X > 9,
+    print_border.
+print_format(_,Y):-
+    Y < 0,
+    print_border.
+print_format(_,Y):-
+    Y > 9,
+    print_border.
+print_format(X,Y):-
+  grid(X,Y,Z),
+  Z = blank,
+  print_inaccessible.
+print_format(_,_):-print_accessible.
+
 /* Print logo in the game */
 print_logo :-
   nl,
@@ -87,7 +149,7 @@ print_status :-
     write('Items'),nl,
     write(Items).
 
-  /* print location player right now */
+  /* print current player location */
     print_player_nearby :-
         get_position(X,Y), print_player_loc(X,Y), !.
 
@@ -102,6 +164,20 @@ print_status :-
 /* Locations in the game */
     print_loc(pleasure_park):-
       write('You are in Pleasure Park!'), nl, !.
+    print_loc(jester_junkyard):-
+      write('You are in Jester Junkyard!'), nl, !.
+    print_loc(misty_mire):-
+      write('You are in Misty Mire!'), nl, !.
+    print_loc(rusty_retail):-
+      write('You are in Rusty Retail!'), nl, !.
+    print_loc(gunners_grove):-
+      write('You are in Gunners Grove!'), nl, !.
+    print_loc(freaky_forest):-
+      write('You are in Freaky Forest!'), nl, !.
+    print_loc(anarchy_arcade):-
+      write('You are in Anarchy Arcade!'), nl, !.
+    print_loc(lucky_lake):-
+      write('You are in Lucky Lake!'), nl, !.
     print_loc(twisted_towers):-
       write('You are in Twisted Towers!'), nl, !.
 
@@ -135,15 +211,86 @@ print_status :-
 
 /* print nearby location */
   print_north(X,Y) :-
-    grid(X,Y,Loc), print_nearby_loc(north, Loc).
+    grid(X,Y,_,Loc), print_nearby_loc(north, Loc).
   print_south(X,Y) :-
-    grid(X,Y,Loc), print_nearby_loc(south, Loc).
+    grid(X,Y,_,Loc), print_nearby_loc(south, Loc).
   print_east(X,Y) :-
-    grid(X,Y,Loc), print_nearby_loc(east, Loc).
+    grid(X,Y,_,Loc), print_nearby_loc(east, Loc).
   print_west(X,Y) :-
-    grid(X,Y,Loc), print_nearby_loc(west, Loc).
+    grid(X,Y,_,Loc), print_nearby_loc(west, Loc).
 
 print_nearby_loc(pleasure_park)
   format('In the ~w, you see Pleasure Park!', [Direction]), nl, !.
 print_nearby_loc(twisted_towers)
   format('In the ~w, you see Twisted Towers!'), [Direction]), nl, !.
+print_nearby_loc(deadzone)
+  format('In the ~w, you see the Deadzone!'), [Direction]), nl, !.
+print_nearby_loc(jester_junkyard)
+  format('In the ~w, you see Jester Junkyard!'), [Direction]), nl, !.
+print_nearby_loc(misty_mire)
+  format('In the ~w, you see Misty Mire!'), [Direction]), nl, !.
+print_nearby_loc(rusty_retail)
+  format('In the ~w, you see Rusty Retail!'), [Direction]), nl, !.
+print_nearby_loc(gunners_grove)
+  format('In the ~w, you see Gunners Grove!'), [Direction]), nl, !.
+print_nearby_loc(freaky_forest)
+  format('In the ~w, you see Freaky Forest!'), [Direction]), nl, !.
+print_nearby_loc(anarchy_arcade)
+  format('In the ~w, you see Anarchy Arcade!'), [Direction]), nl, !.
+print_nearby_loc(lucky_lake)
+  format('In the ~w, you see Lucky Lake!'), [Direction]), nl, !.
+
+/* Location Effect */
+print_deadzone_effect :-
+  write('You are in the deadzone! Your health is decreased!'), nl, !.
+
+/* print movement */
+print_move_north :-
+    nl, write('You have moved to the north of your previous location'), nl.
+
+print_move_south :-
+    nl, write('You have moved to the south of your previous location.'), nl.
+
+print_move_east :-
+    nl, write('You have moved to the east of your previous location'), nl.
+
+print_move_west :-
+    nl, write('You have moved to the west of your previous location'), nl.
+
+/* print fail attack */
+  fail_attack :-
+    nl, write('There\'s no enemy in your sight !'), nl.
+
+/* print fail move */
+  fail_move :-
+    nl, write('You can\'t move!'), nl.
+
+/* print for player */
+print_increase_health(Object, Rate) :-
+  nl, format('You have used ~w!', [Object]), format('Your Health is increased by ~w!', [Rate]), nl,
+  player(_,_,Health,_,_,_,_), format('Your Health is now ~w', [Health]), nl.
+
+print_decrease_health(Amount) :-
+    format('You took ~w damage from your enemy!', [Amount]), nl,
+    player(_,_,Health,_,_,_,_), format('Your Health is now ~w!', [Health]), nl.
+
+print_inflict_damage(Amount):-
+    format('You have inflicted ~w damage to the enemy!', [Amount]),nl.
+
+print_increase_armor(Object, Rate) :-
+    nl, format('You have used ~w! ', [Object]), format('Your Armor is increased by ~w!', [Rate]), nl,
+    player(_,_,_,_,Armor,_,_), format('Your Armor is now ~w', [Armor]), nl.
+
+print_increase_ammo(Object, Rate) :-
+    nl, format('You have used ~w! ', [Object]), format('Your Ammo is increased by ~w!', [Rate]), nl,
+    player(_,_,_,Ammo,_,_,_), format('Your Ammo is now ~w', [Ammo]), nl.
+
+/* print for enemy */
+print_fail_kill :-
+    write('You fail to kill your enemy! The enemy is counterattacking'), nl.
+
+print_enemy_kill :-
+    write('You have killed your enemy!'), nl.
+
+print_drop_item :-
+    write('The enemy dropped an item!'),nl.
