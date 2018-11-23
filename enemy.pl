@@ -140,12 +140,12 @@ is_enemy_same(X, Y) :-
 drop_item(X,Y):-
 	random(1,5,Rand),
 	Rand is 1,
-	drop_food(X,Y),!.
+	drop_ammo(X,Y),!.
 
 drop_item(X,Y):-
 	random(1,5,Rand),
 	Rand is 2,
-	drop_drink(X,Y),!.
+	drop_armor(X,Y),!.
 
 drop_item(X,Y):-
 	random(1,5,Rand),
@@ -157,19 +157,19 @@ drop_item(X,Y):-
 	Rand is 4,
 	drop_weapon(X,Y),!.
 
-drop_food(X,Y):-
-	random(1, 6, N),
-	food_rate(N,A,_),
+drop_ammo(X,Y):-
+	random(1, 2, N),
+	ammo_rate(N,A,_),
 	asserta(location(X,Y,A)).
 
-drop_drink(X,Y):-
+drop_armor(X,Y):-
 	random(1, 6, N),
-	drink_rate(N,A,_),
+	ammor_rate(N,A,_),
 	asserta(location(X,Y,A)).
 
 drop_medicine(X,Y):-
 	random(1, 6, N),
-	drink_rate(N,A,_),
+	medicine_rate(N,A,_),
 	asserta(location(X,Y,A)).
 
 drop_weapon(X,Y):-
