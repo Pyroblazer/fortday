@@ -1,8 +1,5 @@
 /*print map*/
-print_map(11,20):- !.
-print_map(11,Y):-
-    Y2 is Y+1,nl,
-    print_map(-1,Y2),!.
+print_map(11,11):- !.
 print_map(X,Y):-
     Y= -1, X2 is X+1 ,print_border,!,
     print_map(X2,Y).
@@ -74,7 +71,7 @@ print_logo :-
 welcome_info :-
   print_logo, nl,
   write('Welcome to Fortday!'), nl,
-  write('You have been sent to a giant battlefield by a battle bus.'), nl,
+  write('You have been sent to a giant battlefield by Tayo, the battle bus.'), nl,
   write('Be the last one standing and you will be declared the winner. '), nl,
   print_start_help,
   print_legend,
@@ -155,10 +152,10 @@ print_status :-
 
     print_player_loc(X,Y) :-
         check_enemy_nearby,
-        grid(X, Y, Loc), nl,
+        grid(X, Y,_, Loc), nl,
         print_loc(Loc), write('You also sense that there\'s enemy nearby..'), nl, !.
     print_player_loc(X,Y) :-
-        grid(X,Y,Loc), nl,
+        grid(X,Y,_,Loc), nl,
         print_loc(Loc), !.
 
 /* Locations in the game */

@@ -33,5 +33,5 @@ widen_deadzone(_,_,_,X) :- steps(X), X mod 5 =\= 0, fail, !.
 initialize_steps :- asserta(steps(0)).
 initialize_deadzone :- asserta(deadzonesize(-1)).
 
-increment_deadzone :- deadzonesize(X), Z is X + 1, asserta(deadzonesize(Z)).
-increment_steps :- steps(X), Z is X + 1, asserta(steps(Z)).
+increment_deadzone :- deadzonesize(X), Z is X + 1, retract(deadzonesize(X)), asserta(deadzonesize(Z)).
+increment_steps :- steps(X), Z is X + 1, retract(steps(X)), asserta(steps(Z)).
