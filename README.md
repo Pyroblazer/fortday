@@ -1,2 +1,0 @@
-# fortday
-ABB Project
