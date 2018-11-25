@@ -8,12 +8,6 @@
 */
 ingamestate(0).
 
-/*
-countzuko(1).
-countaang(0).
-countkatara(0).
-countsword(0).*/
-
 /* Deklarasi Fakta */
 area(0, emptyarea).
 area(1, emptyarea).
@@ -48,7 +42,7 @@ locationName(X, Y, Place) :- A is X mod 5, B is Y mod 4, N is A+B, area(N, Place
 /* Game loop */
 command_input   :- ingamestate(1),
 			repeat,
-			write('<command>  '),
+			write('>>> '),
 			read(X),
 			run(X),
 			(checkWinner ; X==quit), !, halt.
@@ -60,11 +54,11 @@ path(Xa,Ya,north,Xb,Yb) :- Ya >= 1 , Yb is Ya - 1, Xb is Xa,!.
 path(Xa,Ya,south,Xb,Yb) :- Ya < 20 , Yb is Ya + 1, Xb is Xa,!.
 
 /* Basic rules */
-checkWinner :- kills(X), X == 10, writeln('Hooray!!.. Good job, Alice! All the zombies are down.'),!,halt.
-checkWinner :- win(X), X == 0, writeln('Oh no! Alice is exhausted and can\'t move again!.. White Kingdom is fully occupied by Umbrella corp, Game over!.'),!.
-checkWinner :- win(X), X == 1, writeln('Hooray!!.. Good job, Alice! All the zombies are down.'),!,halt.
+checkWinner :- kills(X), X == 10, writeln('You won. hehe :)'),!,halt.
+checkWinner :- win(X), X == 0, writeln('U dai...'),!.
+checkWinner :- win(X), X == 1, writeln('You won. hehe :)'),!,halt.
 writeifenemynearby([]) :- true,!.
-writeifenemynearby(List) :- isEnemy(List), write(' and there is an enemy here.. Watch out!!').
+writeifenemynearby(List) :- isEnemy(List), write(' careful....').
 isdefined(X,Y) :- X>=0, X<11, Y>=0, Y<21.
 islistkosong([]).
 isEnemy([]):- fail.
@@ -137,8 +131,16 @@ init_dynamic_facts(X,Y) :-
 									N is 0,
 									init_dynamic_facts(M,N).
 
-start:- writeln('White Queen Kingdom has been invaded by Umbrella Corp.!'),
-		writeln('Help Alice to defeat the invaders!'),
+start:- 
+  write('___________            __      .___             '), nl,
+  write('\\_   _____/___________/  |_  __| _/____  ___.__.'), nl,
+  write(' |    __)/  _ \\_  __ \\   __\\/ __ |\\__  \\<   |  |'), nl,
+  write(' |     \\(  <_> )  | \\/|  | / /_/ | / __ \\\\___  |'), nl,
+  write(' \\___  / \\____/|__|   |__| \\____ |(____  / ____|'), nl,
+  write('     \\/                         \\/     \\/\\/     '), nl,
+  write('Welcome to Fortday!'), nl,
+  write('You have been sent to a giant battlefield by Tayo, the battle bus.'), nl,
+  write('Be the last one standing and you will be declared the winner. '), nl,
 		help,
 		restartgame,
 		random(0, 10, X), /*random Alice (X position)*/
@@ -245,7 +247,7 @@ prio(X,Y) :- player_pos(A,B),
 						Y==B,
 						write('A').
 
-printmap(_,Y) :- Y == 21 , nl, player_pos(R,T), write('Your location is ('), write(R), write(',') , write(T), writeln('). Relative to the top left corner which is (0,0)'), true.
+printmap(_,Y) :- Y == 21 , nl, player_pos(R,T), write('Current location is ('), write(R), write(',') , write(T), writeln(').'), true.
 
 printmap(X,Y) :- X < 11, Y < 21,
 						write(' '), prio(X,Y), write(' '),
@@ -279,87 +281,79 @@ look :- ingamestate(1),
 		write('  '), prio(A,F),
 		write('  '), prio(B,F),
 		write('  '), prio(C,F),nl,
-		write('You are in '), write(Place), writeifenemynearby(EList), nl,
+		write('You are now in '), write(Place), writeifenemynearby(EList), nl,
 		writeln('Items in this area is/are '), writelist(List),!.
 
-help :- writeln(' _______ ___     ___ _______ _______     __   __ _______     __   __ __   __ _______ ______   _______ ___     ___     _______     _______ _______     '),
-				writeln('|   _   |   |   |   |   ____|       |   |  | |  |       |   |  | |  |  |_|  |  _    |    _ | |       |   |   |   |   |   _   |   |  _____|       |    '),
-				writeln('|  |_|  |   |   |   |  |    |    ___|   |  |_|  |  _____|   |  | |  |       | |_|   |   | || |    ___|   |   |   |   |  |_|  |   |  |    |   _   |    '),
-				writeln('|       |   |   |   |  |    |   |___    |       | |_____    |  | |  |       |       |   |_||_|   |___|   |   |   |   |       |   |  |    |  | |  |    '),
-				writeln('|       |   |___|   |  |    |    ___|   |       |_____  |   |  |_|  |       |  _   ||    __  |    ___|   |___|   |___|       |   |  |    |  |_|  |___  '),
-				writeln('|   _   |       |   |  |____|   |___     |     | _____| |   |       | ||_|| | |_|   |   |  | |   |___|       |       |   _   |   |  |____|       |   | '),
-				writeln('|__| |__|_______|___|_______|_______|     |___| |_______|   |_______|_|   |_|_______|___|  |_|_______|_______|_______|__| |__|   |_______|_______|___|  '),
-		writeln('These are the available commands:'),
-		writeln('- start.          = start the game.'),
-		writeln('- north. east. west. south. = go to somewhere (follow compass rules).'),
-		writeln('- look.           = look things around you.'),
-		writeln('- help.           = see available commands.'),
-		writeln('- maps.           = show map if you have one.'),
-		writeln('- take(Obj).      = pick up an object.'),
-		writeln('- drop(Obj).      = drop an object.'),
-		writeln('- use(Obj)        = use an object.'),
-		writeln('- attack.         = attack enemy that accross your path.'),
-		writeln('- status.         = display Alice status.'),
-		writeln('- save(FileName). = save your game.'),
-		writeln('- loads(FileName).= load previously saved game.'),
-		writeln('- quit.           = quit the game.'),
-		writeln('Legends : '),
-		writeln('W = Water'),
-		writeln('M = Medicine'),
-		writeln('F = Food'),
-		writeln('@ = Weapon'),
-		writeln('A = Alice'),
-		writeln('E = Enemy'),
-		writeln('# = Inaccesible'),
-		writeln('- = Accesible').
+help :- writeln('-----------------------------------------------------------------------'),
+        writeln('This is a game!!'),
+        writeln('-----------------------------------------------------------------------'),
+        writeln('These are the available commands:'),
+        writeln('- start.          = start game.'),
+        writeln('- n. w. s. e.     = move'),
+        writeln('- look.           = look around'),
+        writeln('- help.           = see this help menu'),
+        writeln('- maps.           = show map'),
+        writeln('- take(Obj).      = take object'),
+        writeln('- drop(Obj).      = drop object.'),
+        writeln('- use(Obj)        = use object.'),
+        writeln('- attack.         = attack enemy'),
+        writeln('- status.         = display status'),
+        writeln('- save(FileName). = save game.'),
+        writeln('- loads(FileName).= load game.'),
+        writeln('- quit.           = quit game.'),
+        writeln('What you see...'),
+        writeln('M = Medicine'),
+        writeln('W = Weapon'),
+        writeln('A = YOU'),
+        writeln('E = Enemy'),
+        writeln('X = Inaccesible'),
+        writeln('- = Accesible').
 
 maps :-	ingamestate(1),bag(ListItem), isMember(radar, ListItem),printmap(0,0),!.
-maps :- ingamestate(1),bag(ListItem),\+isMember(radar,ListItem),writeln('There is no radar in your bag. Try to find the radar to see full maps!'),!.
-
-/* Describe object that is taken by Alice */
+maps :- ingamestate(1),bag(ListItem),\+isMember(radar,ListItem),writeln('Use radar to see full maps'),!.
 
 desc(Obj) :- Obj == medicine,
-			writeln('While particularly ordinary, this medicine can quickly mend even the deepest of wounds.'),
-			writeln('Ability : Restore Alice''s health (+4HP) when used.').
+            writeln('When a doctor is not around, medicine is all you need...'),
+            writeln('Restores 5 HP').
 
-desc(Obj) :- Obj == potion,
-			writeln('An essential things that aids you to survive this mess.'),
-			writeln('Ability : Restore Alice''s health (+4HP) when used.').
+desc(Obj) :- Obj == bandage,
+            writeln('No medicine? Use potion instead.'),
+            writeln('Restores 5 HP').
 
 desc(Obj) :- Obj == fire,
-			writeln('It''s a banana, what do you expect anyway. Peel it and just eat it.'),
-			writeln('Ability : Gain 2 hunger points when consumed.').
+            writeln('Zuko needs fire'),
+            writeln('Adds 1 fire element to Zuko :)').
 
 desc(Obj) :- Obj == water,
-			writeln('An ordinary Japanese kobe beef, except the taste is not.'),
-			writeln('Ability : Gain 2 hunger points when consumed.').
+            writeln('Katara needs water'),
+            writeln('Adds 1 water element to Katara :)').
 
 desc(Obj) :- Obj == air,
-			writeln('A black Iberian pork. You know how expensive it is, don''t you?.'),
-			writeln('Ability : Gain 2 hunger points when consumed.').
+            writeln('Aang needs air'),
+            writeln('Adds 1 air element to Aang :)').
 
 desc(Obj) :- Obj == zuko,
-			writeln('The bearer of this mighty zuko gains the ability to cut down enemiy at one swing.'),
-			writeln('Ability : Slay zombie with one swing.').
+            writeln('The legendary fire prince, you are now ZUKO!!'),
+            writeln('Fire bending is acquired!').
 
 desc(Obj) :- Obj == katara,
-			writeln('A katara of sharpened rock blades imbued with magical fire.'),
-			writeln('Ability : Shattered zombie when thrown.').
+            writeln('Beautiful lady from the water village deep in the glacier, you are now KATARA!!'),
+            writeln('Water bending is acquired!').
 
 desc(Obj) :- Obj == appa,
-			writeln('An old waterpouch made from cattle skin.'),
-			writeln('Ability : Gain 2 thirst points when drinked.').
+            writeln('Appa here for the rescue'),
+            writeln('Adds 2 armor').
 
 desc(Obj) :- Obj == momo,
-			writeln('Sweet.'),
-			writeln('Ability : Gain 2 hunger points when consumed.').
+            writeln('Momo here for the rescue'),
+            writeln('Adds 2 armor').
 
 desc(Obj) :- Obj == aang,
-			writeln('Not the aang you thought of.'),
-			writeln('Ability : Bury enemy down with one hit.').
+            writeln('Being in the ice for 1000000 years is not so nice, you are now AANG!!'),
+            writeln('Air bending is acquired!').
 
 desc(Obj) :- Obj == radar,
-			writeln('Grants the ability to see every items and zombies').
+            writeln('See full map dongs').
 
 /* 	Menghitung damage yang diterima saat otomatis diserang musuh
 	karena berada dalam petak yang sama */
@@ -368,8 +362,6 @@ countPower([H|T],X) :- enemies(H), enemypower(H,ATK),
                         countPower(T,X1),
                         X is X1 + ATK.
 
-/* 	Jika tidak melakukan pergerakan atau attack, dan di dalam kotak yang sama
-	dengan sebuah atau beberapa zombie, maka akan mendapatkan serangan */
 isAttacked(EList) :- \+isEnemy(EList),!.
 
 isAttacked(EList) :- isEnemy(EList),
@@ -382,7 +374,7 @@ isAttacked(EList) :- isEnemy(EList),
 						_newHP > 0,
 						retract(health(_)),
 						asserta(health(_newHP)),
-						write('You took '),write(Factor),write(' damage for not moving or attacking the zombie.'),!,nl.
+						write('Enemy hits you for '),write(Factor),write(' damage.'),!,nl.
 
 isAttacked(EList) :- isEnemy(EList),
 						countPower(EList,Dmg),
@@ -469,7 +461,7 @@ randomEnemy(X,Y) :- inarea_contain(X,Y,_ListN,EList),
 						randomEnemy(M,N).
 
 randomEnemy(_,Y) :- Y == 21, nl, break,
-						write('The enemies has moved.').
+						write('Enemy moved').
 
 /* Take object from where you are, and put it in backpack, max item in backpack = 4 */
 setcountweapon(X,Num):-
@@ -509,7 +501,7 @@ take(Obj) :- ingamestate(1),
 						asserta(bag(BagListNew)),
 						asserta(inarea_contain(X,Y,ListNew,EList)),
 						\+isweapon(Obj),
-						write('You have succesfully taken a '), write(Obj) , nl,
+						write('You took '), write(Obj) , nl,
 						desc(Obj),
 						isAttacked(EList),!.
 
@@ -527,9 +519,9 @@ take(Obj) :- ingamestate(1),
 						asserta(bag(BagListNew)),
 						asserta(inarea_contain(X,Y,ListNew,EList)),
 						isweapon(Obj),
-						write('You have succesfully taken a '), write(Obj),
-						getcountweapon(Obj,Z),
-						write(' with ammo : '), write(Z),nl,
+						write('You took '), write(Obj),
+                        getcountweapon(Obj,Z),
+                        write(', element number: '), write(Z),nl,
 						desc(Obj),
 						isAttacked(EList),!.
 
@@ -549,7 +541,7 @@ take(Obj) :- ingamestate(1),
 						asserta(bag(BagListNew)),
 						asserta(inarea_contain(X,Y,ListNew,EList)),
 						\+isweapon(Obj),
-						write('You have succesfully taken a '), write(Obj) , nl,
+						write('You took '), write(Obj) , nl,
 						desc(Obj),
 						isAttacked(EList),!.
 
@@ -567,9 +559,9 @@ take(Obj) :- ingamestate(1),
 						asserta(bag(BagListNew)),
 						asserta(inarea_contain(X,Y,ListNew,EList)),
 						isweapon(Obj),
-						write('You have succesfully taken a '), write(Obj),
-						getcountweapon(Obj,Z),
-						write(' with ammo : '), write(Z),nl,
+						write('You took '), write(Obj),
+                        getcountweapon(Obj,Z),
+                        write(', element number: '), write(Z),nl,
 						desc(Obj),
 						isAttacked(EList),!.
 
@@ -579,7 +571,7 @@ take(Obj) :- ingamestate(1),
 						player_pos(X, Y),
 						inarea_contain(X,Y,List,EList),
 						\+isMember(Obj,List), nl,
-						writeln('What are you, drunk? Alice? That item''s not even here, you can''t just take it outta nowhere.'),
+						writeln('No element here'),
 						isAttacked(EList),!.
 
 take(_) :- ingamestate(1),
@@ -588,8 +580,7 @@ take(_) :- ingamestate(1),
 						bag(BagList),
 						count(BagList,Total),
 						Total==4,
-						write('Alice, you gonna need a bigger bag to take that,'), nl,
-						write('or you could simply drop something first before taking it.'), nl,
+						write('Bag space not enough.'), nl,
 						isAttacked(EList),!.
 
 /* Drop object from your backpack to the area */
@@ -606,7 +597,7 @@ drop(Obj) :- ingamestate(1),
 						delElmt(Obj,BagList,BagListNew),
 						append([Obj],List,ListNew),nl,
 						\+isweapon(Obj),
-						write('You have succesfully dropped your '), write(Obj) , nl,
+						write('You dropped '), write(Obj) , nl,
 						isAttacked(EList),
 						asserta(bag(BagListNew)),
 						asserta(inarea_contain(X,Y,ListNew,EList)),!.
@@ -623,9 +614,9 @@ drop(Obj) :- ingamestate(1),
 						delElmt(Obj,BagList,BagListNew),
 						append([Obj],List,ListNew),nl,
 						isweapon(Obj),
-						write('You have succesfully dropped your '), write(Obj) ,
-						getcountweapon(Obj,Num),
-						write(' which contained : '), write(Num), write(' ammo'), nl,
+						write('You dropped '), write(Obj) ,
+                        getcountweapon(Obj,Num),
+                        write(' with '), write(Num), write(' element number'), nl,
 						isAttacked(EList),
 						asserta(bag(BagListNew)),
 						asserta(inarea_contain(X,Y,ListNew,EList)),!.
@@ -638,7 +629,7 @@ drop(Obj) :- ingamestate(1),
 						count(BagList,Total),
 						Total>0,
 						\+isMember(Obj,BagList), nl,
-						writeln('Stop hallucinating, Alice. You don''t have that thing in your backpack.'),nl,
+						writeln('No such element'),nl,
 						isAttacked(EList),!.
 
 drop(_) :- ingamestate(1),
@@ -647,7 +638,7 @@ drop(_) :- ingamestate(1),
 						bag(BagList),
 						count(BagList,Total),
 						Total==0,
-						write('You don''t have anything in your backpack.'), nl, !,
+						write('Bag empty'), nl, !,
 						isAttacked(EList),!.
 
 /*Use Procedure*/
@@ -656,7 +647,7 @@ use(Obj) :- bag(BagList),
 						isMember(Obj, BagList),
 						armor(H),
 						H == 100,nl,
-						writeln('Alice : Hmmm, I can\'t take another armor'),
+						writeln('Max element number'),
 						player_pos(X,Y),
 						inarea_contain(X,Y,_,EList),
 						isAttacked(EList),!.
@@ -673,8 +664,7 @@ use(Obj) :- bag(BagList),
 						retract(bag(_)),
 						asserta(bag(NBagList)),
 						asserta(armor(100)),nl,
-						write('Alice wears '), write(Obj), nl,
-						writeln('Yummyy! :)'),
+						write('You activated '), write(Obj), nl,
 						player_pos(X,Y),
 						inarea_contain(X,Y,_,EList),
 						isAttacked(EList),!.
@@ -690,8 +680,7 @@ use(Obj) :- bag(BagList),
 						retract(bag(_)),
 						asserta(bag(NBagList)),
 						asserta(armor(NewH)),nl,
-						write('Alice wears '), write(Obj), nl,
-						writeln('Yummyy! :)'),
+						write('You activated '), write(Obj), nl,
 						player_pos(X,Y),
 						inarea_contain(X,Y,_,EList),
 						isAttacked(EList),!.
@@ -702,8 +691,8 @@ use(Obj) :- isammo(Obj),
 						isMember(Obj, BagList),
 						weapon(Weapon),
 						islistkosong(Weapon),nl,
-						writeln('None of the weapon is equipped !'),
-						write('Threfore Alice cannot use '), write(Obj),
+						writeln('You did not transform to any of the benders'),
+                        write('Thus you cannot use '), write(Obj),
 						player_pos(X,Y),
 						inarea_contain(X,Y,_,EList),
 						isAttacked(EList),!.
@@ -716,8 +705,7 @@ use(Obj) :- isammo(Obj),
 						\+islistkosong(Weapon),
 						getcountweapon(W,Z),
 						Z>2,
-						write(W), write(' can\'t be filled with ammo anymore'), nl,
-						write('Therefore Alice cannot use '), write(Obj),
+						write('Cannot use '), write(Obj),
 						player_pos(X,Y),
 						inarea_contain(X,Y,_,EList),
 						isAttacked(EList),!.
@@ -731,8 +719,8 @@ use(Obj) :- isammo(Obj),
 						getcountweapon(W,Z),
 						Z<3,
 						\+isammo_of(Obj,W),
-						write('Current weapon '),write(W), write(' can\'t be filled with this ammo'), nl,
-						write('Therefore Alice cannot use '), write(Obj),
+						write('Current bender '),write(W), write(' does not match this element'), nl,
+                        write('Cannot use '), write(Obj),
 						player_pos(X,Y),
 						inarea_contain(X,Y,_,EList),
 						isAttacked(EList),!.
@@ -750,9 +738,8 @@ use(Obj) :- isammo(Obj),
 						retract(bag(_)),
 						asserta(bag(NBagList)),
 						setcountweapon(W,Z+1),
-						write('Alice use '), write(Obj), nl,
-						write('Ammo of '), write(W), write(' has increased by 1'),nl,
-						writeln('Sluuurrpp! :)'),
+						write('Using '), write(Obj), nl,
+                        write('Element number of '), write(W), write(' goes up by one'),nl,
 						player_pos(X,Y),
 						inarea_contain(X,Y,_,EList),
 						isAttacked(EList),!.
@@ -764,7 +751,7 @@ use(Obj) :- bag(BagList),
 						isMember(Obj, BagList),
 						health(H),
 						H == 100,nl,
-						writeln('Alice : No, I don\'t need this now'),
+						writeln('Still strong enuffff'),
 						player_pos(X,Y),
 						inarea_contain(X,Y,_,EList),
 						isAttacked(EList),!.
@@ -781,8 +768,7 @@ use(Obj) :- bag(BagList),
 						retract(bag(_B)),
 						asserta(bag(NBagList)),
 						asserta(health(_NewH)),nl,
-						write('Alice uses '), write(Obj), nl,
-						writeln('I feel better now :)'),
+						write('Using '), write(Obj), nl,
 						player_pos(X,Y),
 						inarea_contain(X,Y,_,EList),
 						isAttacked(EList),!.
@@ -798,8 +784,7 @@ use(Obj) :- bag(BagList),
 						retract(bag(_B)),
 						asserta(bag(NBagList)),
 						asserta(health(_NewH)),nl,
-						write('Alice use '), write(Obj), nl,
-						writeln('I feel better now :)'),
+						write('Using '), write(Obj), nl,
 						player_pos(X,Y),
 						inarea_contain(X,Y,_,EList),
 						isAttacked(EList),!.
@@ -816,7 +801,7 @@ use(Obj) :- bag(BagList),
 						append([Obj], Weapon, _NewW),
 						asserta(bag(NBagList)),
 						asserta(weapon(_NewW)),nl,
-						write('Now, you will use '), write(Obj), writeln(' to protect yourself from the zombie.'),
+						write('Using '), write(Obj), nl,
 						player_pos(X,Y),
 						inarea_contain(X,Y,_,EList),
 						isAttacked(EList),!.
@@ -835,15 +820,15 @@ use(Obj) :- bag(BagList),
 						append([Obj], NWeapon, NewW),
 						asserta(bag(NBagL)),
 						asserta(weapon(NewW)),nl,
-						write(W), write(' will be stored in inventory'),nl,
-						write('Now, you will use '), write(Obj), writeln(' to protect yourself from the zombie.'),
+						write(W), write(' kept in bag'),nl,
+                        write('Using '), write(Obj),
 						player_pos(X,Y),
 						inarea_contain(X,Y,_,EList),
 						isAttacked(EList),!.
 
 use(Obj) :- bag(BagList),
 						\+isMember(Obj, BagList),nl,
-					write(Obj), writeln(' isn\'t available in your bag'),
+					write(Obj), writeln(' not found in bag'),
 					player_pos(X,Y),
 					inarea_contain(X,Y,_,EList),
 					isAttacked(EList),!.
@@ -862,7 +847,7 @@ attack :- ingamestate(1),
 					\+isEnemy(EList),
 					weapon(Weapon),
 					islistkosong(Weapon),
-					writeln('There is no enemy here. Be focus Alice! :('),!,
+					writeln('No enemy found'),!,
 					randomEnemy(0,0).
 
 attack :- ingamestate(1),
@@ -873,7 +858,7 @@ attack :- ingamestate(1),
 					\+islistkosong(Weapon),
 					weapon([W|_]),
 					getcountweapon(W,Count), Count==0,
-					writeln('There is no enemy here. Be focus Alice! :('),!,
+					writeln('No enemy found'),!,
 					randomEnemy(0,0).
 
 attack :- ingamestate(1),
@@ -883,8 +868,8 @@ attack :- ingamestate(1),
 					weapon([W|_]),
 					getcountweapon(W,Count), Count>0,
 					setcountweapon(W,Count-1),
-					writeln('There is no enemy here. Be focus Alice! :('),
-					write('Despite '), write(W), write(' ammo is decreased by 1'),nl,!,
+					writeln('No enemy found'),
+                    write('But '), write(W), write(' element number -1 :('),nl,!,
 					randomEnemy(0,0).
 
 
@@ -895,9 +880,9 @@ status :- ingamestate(1),
 		armor(H),
 		bag(BagList),
 		write('Health    = '), writeln(Hp),
-		write('Armor    = '), writeln(H),
-		write('Weapon    = '), writelist(WeaponList),
-		writeln('Inventory = '), writeInventoryList(BagList),!.
+        write('Animal    = '), writeln(H),
+        write('Bender    = '), writelist(WeaponList),
+        writeln('Bag = '), writeInventoryList(BagList),!.
 
 status :- ingamestate(1),
 		weapon(WeaponList),
@@ -908,9 +893,9 @@ status :- ingamestate(1),
 		armor(H),
 		bag(BagList),
 		write('Health    = '), writeln(Hp),
-		write('Armor    = '), writeln(H),
-		write('Weapon    = '), write(W), write('  ammo : '), write(Num), nl,
-		writeln('Inventory = '), writeInventoryList(BagList),!.
+        write('Animal    = '), writeln(H),
+        write('Bender    = '), write(W), write(' with element number '), write(Num), nl,
+        writeln('Bag = '), writeInventoryList(BagList),!.
 
 writeInventoryList(Bag):-
 	islistkosong(Bag),!.
@@ -922,7 +907,7 @@ writeInventoryList([Obj|T]):-
 
 	isweapon(Obj),!,
 	getcountweapon(Obj,Count),
-	write('> '),write(Obj),write(' with ammo : '),write(Count),nl,
+	write('> '),write(Obj),write(' with element number '),write(Count),nl,
 	writeInventoryList(T).
 
 save(FileName) :- tell(FileName), listing(player_pos), listing(bag), listing(health),
@@ -931,19 +916,19 @@ save(FileName) :- tell(FileName), listing(player_pos), listing(bag), listing(hea
 loads(FileName) :- retractall(player_pos(_,_)), retractall(bag(_)), retractall(health(_)),
 				retractall(hunger(_)), retractall(thirsty(_)), retractall(inarea_contain(_,_,_,_)), [FileName].
 
-quit :- write('Alice gives up to the Zombies. Game over.'), halt.
+quit :- write('You dai...'), halt.
 
 /* Kalkulasi serangan (zombie) */
 calcdecreased([_H|_]) :- weapon(W),
 														islistkosong(W),
-														writeln('You can\'t attack the enemy, Alice. You must held the weapon first'),
+														writeln('Not a bender, cannot attack'),
 														isAttacked(EList),!.
 
 calcdecreased([_H|_]) :- weapon(W),
 														\+islistkosong(W),
 														weapon([Obj|_]),
 														getcountweapon(Obj, Count), Count==0,
-														writeln('You can\'t attack the enemy, Alice. The ammo isn\'t filled'),
+														writeln('Not a bender, cannot attack'),
 														isAttacked(EList),!.
 
 
@@ -958,16 +943,16 @@ calcdecreased([H|_]) :- enemies(H), enemypower(H, Atk),
 						 Factor is (100-Z)/100 *Atk,
 						 _NewHP is HP - Factor,
 						 _NewHP > 0,nl,
-						 write('You took '), write(Factor), write(' damage!. Alice attacks '), write(H), writeln(' back!'),
+						 write('Enemy hits you for '), write(Factor), write(' damage! Counter-attacking '), write(H),
 						 retract(inarea_contain(X,Y,Listt,_E)),
 						 getcountweapon(W,Count),
 						 setcountweapon(W,Count-1),
 						 enemyitem(H,Item),
 						 enemyitem(H,[F|_]),
-						 writeln('Enemy is down!..... '), write(F), write(' felt from '), write(H), nl,
+						 writeln('Enemy ded '), write(F), write(' fell from '), write(H), nl,
 						 append(Item,Listt,ListNew),
 						 asserta(inarea_contain(X,Y,ListNew,[])),
-						 write('Your HP is '), writeln(_NewHP),
+						 write('Current HP: '), writeln(_NewHP),
 						 retract(health(_HP)),
 						 retract(kills(_K)),
 						 NewK is K + 1,
@@ -1011,7 +996,7 @@ direction(Direction) :-
 			armor(H),
 			H>0,
 			path(Xa,Ya, Direction,Xb,Yb),nl,
-			write('You moved to the '), writeln(Direction),
+			write('Moving to '), writeln(Direction),
 			retract(player_pos(Xa,Ya)),
 			retract(armor(_)),
 			retract(countstep(_)),
@@ -1029,7 +1014,7 @@ direction(Direction) :-
 			player_pos(Xa,Ya),
 			countstep(Step),
 			path(Xa,Ya, Direction,Xb,Yb),nl,
-			write('You moved to the '), writeln(Direction),
+			write('Moving to '), writeln(Direction),
 			retract(player_pos(Xa,Ya)),
 			retract(countstep(_)),
 			NewStep is Step+1,
@@ -1043,7 +1028,7 @@ direction(Direction) :-
 			ingamestate(1),
 			player_pos(Xa,Ya),
 			\+path(Xa,Ya, Direction,_,__),
-			write('Alice, you can\'t direction there!. Please return to your last location!.'),!.
+			write('Cannot go there'),!.
 
 direction(_) :-
 			ingamestate(1),
@@ -1063,10 +1048,10 @@ direction(_) :-
 
 
 direction(_) :- ingamestate(1),
-			writeln('Your inputs wrong. Undefined!.'),!.
+			writeln('Wrong input'),!.
 
 direction(_) :- ingamestate(0),
-			writeln('You must start the game first!').
+			writeln('Start game first!').
 
 north :- direction(north).
 south :- direction(south).
