@@ -1,5 +1,8 @@
 /* This is the map for the game*/
-grid(X,Y,Z,Building) :- deadzonesize(Z), (X @< Z ; X @> 9-Z) , (Y @> Z ; Y @> 9-Z), widen_deadzone(Z,_), Building = deadzone.
+grid(X,Y,Z,Building) :- deadzonesize(Z), X =< Z, Y >= 0, Y =< 9, widen_deadzone(Z,_), Building = deadzone, !.
+grid(X,Y,Z,Building) :- deadzonesize(Z), X >= (9-Z),Y >= 0, Y =< 9, widen_deadzone(Z,_), Building = deadzone, !.
+grid(X,Y,Z,Building) :- deadzonesize(Z), Y =< Z , X >=0 , X =< 9,widen_deadzone(Z,_), Building = deadzone, !.
+grid(X,Y,Z,Building) :- deadzonesize(Z), Y >= (9-Z), X >= 0, X =< 9, widen_deadzone(Z,_), Building = deadzone, !.
 grid(X, Y, _, Building) :- X >= 0, X =< 2, Y >= 0, Y =< 2, Building = pleasure_park, Building \== deadzone, !.
 grid(X, Y, _, Building) :- X >= 3, X =< 5, Y >= 0, Y =< 2, Building = jester_junkyard, Building \== deadzone, !.
 grid(X, Y, _, Building) :- X >= 6, X =< 9, Y >= 0, Y =< 2, Building = misty_mire, Building \== deadzone, !.
@@ -24,13 +27,13 @@ effect_location:-!.
 :- dynamic(steps/1).
 :- dynamic(deadzonesize/1).
 
-widen_deadzone(Z,_) :- deadzonesize(Z), Z is 4, fail, !.
-widen_deadzone(Z,X) :- steps(X), deadzonesize(Z), X =\= 0 , X mod 5 =:= 0, increment_deadzone, print_deadzone_increase, !.
-widen_deadzone(_,X) :- steps(X), X is 0, fail, !.
-widen_deadzone(_,X) :- steps(X), X mod 5 =\= 0, fail, !.
+/*widen_deadzone(Z,_) :- deadzonesize(Z), Z is 4, !. */
+widen_deadzone(Z,X) :- steps(X), deadzonesize(Z), X =\= 0 , X mod 5 =:= 0, increment_deadzone, asserta(steps(0)), retract(steps(X)), !.
+widen_deadzone(Z,X) :- deadzonesize(Z), steps(X), X is 0, !.
+widen_deadzone(Z,X) :- deadzonesize(Z), steps(X), X mod 5 =\= 0, !.
 
 initialize_steps :- asserta(steps(0)).
 initialize_deadzone :- asserta(deadzonesize(-1)).
 
-increment_deadzone :- deadzonesize(X), Z is X + 1, retract(deadzonesize(X)), asserta(deadzonesize(Z)).
-increment_steps :- steps(X), Z is X + 1, retract(steps(X)), asserta(steps(Z)).
+increment_deadzone :- deadzonesize(X), Z is X + 1, asserta(deadzonesize(Z)),  retract(deadzonesize(X)).
+increment_steps :- steps(X), Z is X + 1, asserta(steps(Z)), retract(steps(X)).

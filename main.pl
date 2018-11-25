@@ -5,7 +5,6 @@
 :- include('player.pl').
 :- include('print.pl').
 
-/* Hentikan semua kegilaan ini */
 /* This is command to start the game */
 start :- g_read(started, X), X = 1, write('Game has already started'), nl, fail, !.
 start :-
@@ -51,7 +50,7 @@ init_everything :-
 %is_input(take(_)):-!.
 %is_input(use(_)):-!.
 %is_input(load):-!.
-%is_input(_):- write('Wrong input.'),nl,fail,!.
+%is_input(_):- write('Wrong input.'),nl,fail,!. 
 
 /* Check for command which not make a turn */
 

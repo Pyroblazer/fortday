@@ -1,9 +1,9 @@
 /*print map*/
-print_map(11,11):- !.
-print_map(11,Y):-
-    Y2 is Y+1,nl,
-    print_map(-1,Y2),!.
-print_map(X,Y):-
+print_map(0,10):- !.
+print_map(9,Y):-
+    Y2 is Y+1, print_format(9,Y), nl,
+    print_map(0,Y2),!.
+/* print_map(X,Y):-
     Y = -1,X2 is X+1 ,print_border,!,
     print_map(X2,Y).
 print_map(X,Y):-
@@ -14,7 +14,7 @@ print_map(X,Y):-
     print_map(X2,Y).
 print_map(X,Y):-
     X=10,X2 is X+1, print_border,!,
-    print_map(X2,Y).
+    print_map(X2,Y). */
 print_map(X,Y):-
     X2 is X+1, print_format(X,Y),!,
     print_map(X2,Y).
@@ -23,46 +23,60 @@ print_map(X,Y):-
 print_format(X,Y):-
     player(X,Y,_,_,_,_,_),
     print_player.
+print_format(X,Y) :-
+    grid(X,Y,_,Z),
+    Z = deadzone,
+    print_deadzone.
 print_format(X,Y):-
+    grid(X,Y,_,Z),
+    Z \== deadzone,
     enemy(_,X,Y,_,_),
     print_enemy.
 print_format(X,Y):-
+    grid(X,Y,_,Z),
+    Z \== deadzone,
     location(X,Y,Item),
     weapon_id(_,Item),
     print_weapon.
 print_format(X,Y):-
+    grid(X,Y,_,Z),
+    Z \== deadzone,
     location(X,Y,Item),
     type_item(medicine,Item),
     print_medicine.
 print_format(X,Y):-
+    grid(X,Y,_,Z),
+    Z \== deadzone,
     location(X,Y,Item),
     type_item(ammo,Item),
     print_ammo.
 print_format(X,Y):-
+    grid(X,Y,_,Z),
+    Z \== deadzone,
     location(X,Y,Item),
     type_item(armor,Item),
     print_armor.
-print_format(X,_):-
+/* print_format(X,_):-
+    grid(X,_,_,Z),
     X < 0,
     print_border.
 print_format(X,_):-
+    grid(X,_,_,Z),
     X > 9,
     print_border.
 print_format(_,Y):-
+    grid(_,Y,_,Z),
     Y < 0,
     print_border.
 print_format(_,Y):-
+    grid(_,Y,_,Z),
     Y > 9,
-    print_border.
-print_format(X,Y) :-
-  grid(X,Y,_,Z),
-  Z = deadzone,
-  print_deadzone.
+    print_border. */
 print_format(X,Y):-
   grid(X,Y,_,Z),
   Z = blank,
   print_inaccessible.
-print_format(_,_):-print_accessible.
+print_format(_,_):- print_accessible.
 
 /* Print logo in the game */
 print_logo :-
@@ -247,7 +261,7 @@ print_nearby_loc(Direction, lucky_lake) :-
 
 /* Deadzone size */
 print_deadzone_increase :-
-  write(''), nl, !.
+  write('The deadzone area has been increased'), nl, !.
 
 /* Location Effect */
 print_deadzone_effect :-

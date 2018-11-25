@@ -91,7 +91,7 @@ drop(Object) :-
 	format('You don\'t have ~w!',[Object]),nl.
 
 /* PRINT MAP */
-map:- print_map(-1,-1), nl, !.
+map:- print_map(0,0), nl, !.
 
 /* TAKE OBJECT */
 take(Object):-

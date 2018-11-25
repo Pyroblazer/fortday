@@ -28,9 +28,9 @@ init_player:-
 increase_health(Amount):-
     player(X,Y,Health,Ammo,Armor,Weapon,ItemList),
     ResultHealth is Health+Amount,
-    ResultHealth > 150,
+    ResultHealth > 100,
     retract(player(X,Y,Health,Ammo,Armor,Weapon,ItemList)),
-    asserta(player(X,Y,150,Ammo,Armor,Weapon,ItemList)).
+    asserta(player(X,Y,100,Ammo,Armor,Weapon,ItemList)).
 increase_health(Amount):-
     player(X,Y,Health,Ammo,Armor,Weapon,ItemList),
     ResultHealth is Health+Amount,
