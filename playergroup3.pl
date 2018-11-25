@@ -1,7 +1,5 @@
-/*Dynamics fact disini itu fact bisa berubah2 seiring berjalan game
-*Untuk player position ,look, dll yang berhubungan sama maps itu belum bisa dibuat
-* Catatan : win/ 1 untuk menentukan siapa pemenang game ini, (1 = Alice, 0 = Umbrella Corp, -1 = Belum ada yang menang/Game masih berjalan)
-*/
+/* win(X) menyatakan status kemenangan */
+
 :- use_module(library(random)).
 :- dynamic(deadzone/1,isdeadzone/2,kills/1 ,win/1, player_pos/2, item/2, insidethisplace/4, ingamestate/1, bag/1, health/1, weapon/1, armor/1, enemypower/2, countstep/1, countaxe/1, counthoe/1, countspear/1).
 
@@ -116,12 +114,12 @@ init_zombies :-
 							random(0, 20, Ya),
 							random(0, 10, Xb), /* random ZOMB2 (position) */
 							random(0, 20, Yb),
-							retract(insidethisplace(Xa,Ya,_A,Lista)),
-							retract(insidethisplace(Xb,Yb,_B,Listb)),
+							retract(insidethisplace(Xa,Ya,_,Lista)),
+							retract(insidethisplace(Xb,Yb,_,Listb)),
 							append([majiniundead],Lista,RLista), /*Zombie2*/
 							append([kipepo],Listb,RListb),
-							asserta(insidethisplace(Xa,Ya,_A,RLista)),
-							asserta(insidethisplace(Xb,Yb,_B,RListb)).
+							asserta(insidethisplace(Xa,Ya,_,RLista)),
+							asserta(insidethisplace(Xb,Yb,_,RListb)).
 
 init_dynamic_facts(X,Y) :-
 									X == 11, Y >= 0, true.
@@ -154,7 +152,7 @@ start:- writeln('White Queen Kingdom has been invaded by Umbrella Corp.!'),
 		asserta(health(100)),
 		asserta(win(-1)),
 		asserta(countstep(0)),
-		asserta(deadzone(3)),
+		asserta(deadzone(0)),
 		asserta(ingamestate(1)),
 		asserta(poweraxe(20)),
 		asserta(powerhoe(35)),
@@ -443,7 +441,7 @@ randomEnemy(X,Y) :- player_pos(X,Y),
 						randomEnemy(M,N).
 
 /* RANDOM! (jika di petak ada enemy, dan tidak satu petak dengan player)*/
-randomEnemy(X,Y) :- insidethisplace(X,Y,_ListN,EList),
+randomEnemy(X,Y) :- insidethisplace(X,Y,_,EList),
 						EList \= [],
 						X < 11, Y < 21,
 						M is X + 1, N is Y,
@@ -451,12 +449,12 @@ randomEnemy(X,Y) :- insidethisplace(X,Y,_ListN,EList),
 						moverand(N,X1,Y1),
 						X2 is X1 + X, Y2 is Y1 + Y,
 						X2 > -1, X2 < 11, Y2 > -1, Y2 < 21,
-						insidethisplace(X2,Y2,_ListB,EL),
+						insidethisplace(X2,Y2,_,EL),
 						append(EList,EL,ELNew),
 						retract(insidethisplace(X,Y,_,_)),
 						retract(insidethisplace(X2,Y2,_,_)),
-						asserta(insidethisplace(X,Y,_ListN,[])),
-						asserta(insidethisplace(X2,Y2,_ListB,ELNew)),
+						asserta(insidethisplace(X,Y,_,[])),
+						asserta(insidethisplace(X2,Y2,_,ELNew)),
 						randomEnemy(M,N).
 
 randomEnemy(X,Y) :- insidethisplace(X,Y,_ListN,EList),
@@ -935,6 +933,26 @@ calcbyzombiename([H|_]) :-  zombie(H), enemypower(H, Atk),
 						 retract(win(_X)),
 						 asserta(win(0)),!.
 
+checkDeadZone(X) :-
+	\+(0 is X mod 7), !.
+
+checkDeadZone(X) :-
+	0 is X mod 7,
+	deadzone(W),
+	NewW is W + 1,
+	retract(deadzone(_)),
+	asserta(deadzone(NewW)).
+
+inDeadZone(X,Y) :-
+	\+isdeadzone(X,Y), !.
+
+inDeadZone(X,Y) :-
+	isdeadzone(X,Y), 
+	retract(health(_)),
+	asserta(health(0)),
+	retract(win(_)),
+	asserta(win(0)).
+
 /*go_to another place with direction, 1 step Hunger-=1 dan 3 step Thirsty -= 1*/
 go(Direction) :-
 			ingamestate(1),
@@ -951,8 +969,10 @@ go(Direction) :-
 			NewH is H-1,
 			NewStep is Step + 1,
 			asserta(countstep(NewStep)),
+			checkDeadZone(NewStep),
 			asserta(armor(NewH)),
 			asserta(player_pos(Xb,Yb)),
+			inDeadZone(Xb,Yb),
 			look,!.
 
 go(Direction) :-
@@ -965,7 +985,9 @@ go(Direction) :-
 			retract(countstep(_)),
 			NewStep is Step+1,
 			asserta(countstep(NewStep)),
+			checkDeadZone(NewStep),
 			asserta(player_pos(Xb,Yb)),
+			inDeadZone(Xb,Yb),
 			look,!.
 
 go(Direction) :-
