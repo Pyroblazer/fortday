@@ -4,6 +4,8 @@
 */
 :- use_module(library(random)).
 :- dynamic(kills/1 ,win/1, player_pos/2, item/2, insidethisplace/4, ingamestate/1, bag/1, health/1, weapon/1, armor/1, enemypower/2, countstep/1, countaxe/1, counthoe/1, countspear/1).
+:- dynamic(steps/1).
+:- dynamic(deadzonesize/1).
 
 /*Inisialisasi game
 * 0 = belum mulai permainan atau udah mati, 1 = hidup atau sedang bermain
@@ -50,7 +52,41 @@ ismedicine(bandage).
 * Perhitungan : x mod 5 = 0<=a<=4 , y mod 4 = 0<=b<=3,0<= a+b <=7
 * Misal ->  a+b = 1 (openfield), ikuti fakta yang diatas
 */
-locationName(X, Y, Place) :- A is X mod 5, B is Y mod 4, N is A+B, place(N, Place).
+locationName(X,Y,Z,Place) :- deadzonesize(Z), X =< Z-1, Y >= -1, Y =< 21, widen_deadzone(Z,_), Place = deadzone, !.
+locationName(X,Y,Z,Place) :- deadzonesize(Z), X >= (11-Z), Y >= -1, Y =< 21, widen_deadzone(Z,_), Place = deadzone, !.
+locationName(X,Y,Z,Place) :- deadzonesize(Z), Y =< Z-1 , X >= -1 , X =< 11, widen_deadzone(Z,_), Place = deadzone, !.
+locationName(X,Y,Z,Place) :- deadzonesize(Z), Y >= (21-Z), X >= -1, X =< 11, widen_deadzone(Z,_), Place = deadzone, !.
+locationName(X, Y,_, Place) :- A is X mod 5, B is Y mod 4, N is A+B, place(N, Place), Place \== deadzone.
+
+/* RULE DEADZONE */
+initialize_deadzone :- asserta(deadzonesize(0)).
+initialize_steps :- asserta(steps(0)).
+
+increment_deadzone :- deadzonesize(X), Z is X + 1, asserta(deadzonesize(Z)),  retract(deadzonesize(X)).
+increment_steps :- steps(X), Z is X + 1, asserta(steps(Z)), retract(steps(X)).
+
+widen_deadzone(Z,X) :- steps(X), deadzonesize(Z), X =\= 0 , X mod 5 =:= 0, increment_deadzone, asserta(steps(0)), retract(steps(X)), !.
+widen_deadzone(Z,X) :- deadzonesize(Z), steps(X), X is 0, !.
+widen_deadzone(Z,X) :- deadzonesize(Z), steps(X), X mod 5 =\= 0, !.
+
+effect_location :-
+    player_pos(X,Y),
+    locationName(X,Y,_,Place),
+		Place = deadzone,
+		retractall(insidethisplace(_,_,_,_)),
+		asserta(win(0)),
+		print_deadzone_effect, !.
+effect_location :- !.
+
+print_deadzone_increase :-
+  write('The deadzone area has been increased'), nl, !.
+
+/* Location Effect */
+print_deadzone_effect :-
+  write('You are in the deadzone! Your health is decreased!'), nl, !.
+
+print_deadzone_increase_notif :- steps(X), X mod 5 =\= 0, !.
+print_deadzone_increase_notif :- steps(X), X mod 5 =:= 0, print_deadzone_increase,!.
 
 /* Game loop */
 game_loop   :- ingamestate(1),
@@ -91,10 +127,10 @@ count([_|Tail], N) :- count(Tail, N1), N is N1 + 1.
 isEven(X) :- 0 is mod(X, 2).
 
 /***** Implementasi run command from input *****/
-run(north) :- north, nl,!.
-run(east) :- east, nl,!.
-run(south) :- south, nl,!.
-run(west) :- west, nl,!.
+run(north) :- north, increment_steps, print_deadzone_increase_notif, nl,!.
+run(east) :- east, increment_steps, print_deadzone_increase_notif, nl,!.
+run(south) :- south, increment_steps, print_deadzone_increase_notif, nl,!.
+run(west) :- west, increment_steps, print_deadzone_increase_notif, nl,!.
 run(look) :- look, nl, !. /* predikat untuk melihat posisi sekitar */
 run(help) :- help, nl, !. /* predikat yang memberikan petunjuk game*/
 run(quit) :- quit, nl, !. /* predikat yang menyebabkan game berakhir */
@@ -128,7 +164,7 @@ init_dynamic_facts(X,Y) :-
 
 init_dynamic_facts(X,Y) :-
 									X < 11, Y < 20,
-									locationName(X,Y,Place),
+									locationName(X,Y,_,Place),
 									item(Place, List),
 									asserta(insidethisplace(X,Y,List,[])),
 									M is X,
@@ -137,7 +173,7 @@ init_dynamic_facts(X,Y) :-
 
 init_dynamic_facts(X,Y) :-
 									X < 11, Y == 20,
-									locationName(X,Y,Place),
+									locationName(X,Y,_,Place),
 									item(Place, List),
 									asserta(insidethisplace(X,Y,List,[])),
 									M is X + 1,
@@ -172,6 +208,8 @@ start:- writeln('White Queen Kingdom has been invaded by Umbrella Corp.!'),
 		asserta(item(cave,[bandage,water])),
 		init_dynamic_facts(0,0),
 		init_zombies,
+		initialize_deadzone,
+		initialize_steps,
 		asserta(kills(0)),
 		retract(insidethisplace(X,Y,_AddRadar,_EL)),
 		append([radar], _AddRadar, _AddRadar2),
@@ -208,13 +246,14 @@ restartgame :-
 		retract(weapon(_G)), !.
 		restartgame.
 
+prio(X,Y) :-insidethisplace(X,Y,List,_) , islistkosong(List), player_pos(M,N),
+							M == X, N == Y,
+							write('A'),!.
+prio(X,Y) :- locationName(X,Y,_,Place), Place = deadzone, write('D'),!.
 prio(X,Y) :- \+isdefined(X,Y),
 							write('#'),!.
 prio(X,Y) :- insidethisplace(X,Y,_,EList), EList \= [],
    						write('E'),!.
-prio(X,Y) :-insidethisplace(X,Y,List,_) , islistkosong(List), player_pos(M,N),
-							M == X, N == Y,
-							write('A'),!.
 prio(X,Y) :-insidethisplace(X,Y,List,_) , islistkosong(List),
 							write('-'),!.
 prio(X,Y) :-insidethisplace(X,Y,List,_),
@@ -266,7 +305,7 @@ printmap(X,Y) :-
 /* Skala prioritas penampilan peta: Enemy > Medicine > Food > Water > Weapon > Player. */
 look :- ingamestate(1),
 		player_pos(X, Y),
-		locationName(X, Y, Place),
+		locationName(X, Y,_, Place),
 		insidethisplace(X,Y,List,EList),
 		A is X - 1,
 		B is X,
@@ -950,6 +989,7 @@ go(Direction) :-
 			asserta(countstep(NewStep)),
 			asserta(armor(NewH)),
 			asserta(player_pos(Xb,Yb)),
+			effect_location,
 			look,!.
 
 go(Direction) :-
@@ -963,6 +1003,7 @@ go(Direction) :-
 			NewStep is Step+1,
 			asserta(countstep(NewStep)),
 			asserta(player_pos(Xb,Yb)),
+			effect_location,
 			look,!.
 
 go(Direction) :-
