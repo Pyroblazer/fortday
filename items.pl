@@ -4,7 +4,7 @@
 
 /* Id of weapon */
 weapon_id(0, hand).
-weapon_id(1, handcannon).
+weapon_id(1, handcannon). 
 weapon_id(2, sixshooter).
 weapon_id(3, quadlauncher).
 weapon_id(4, chaingun).

@@ -1,4 +1,4 @@
-:- dynamic(enemy/5).
+:- dynamic(enemy/5). 
 
 /* Enemy(EnemyID, EnemyX, EnemyY, EnemyHealth, EnemyAtk) */
 init_enemy(0) :- !.
