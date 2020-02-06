@@ -1,12 +1,13 @@
 Tugas Besar Logika Informatika
 
-
+```    
 ___________            __      .___             
 \_   _____/___________/  |_  __| _/____  ___.__.
  |    __)/  _ \_  __ \   __\/ __ |\__  \<   |  |
  |     \(  <_> )  | \/|  | / /_/ | / __ \\___  |
  \___  / \____/|__|   |__| \____ |(____  / ____|
      \/                         \/     \/\/     
+```    
 Welcome to Fortday!
 You have been sent to a giant battlefield by Tayo, the battle bus.
 Be the last one standing and you will be declared the winner.
